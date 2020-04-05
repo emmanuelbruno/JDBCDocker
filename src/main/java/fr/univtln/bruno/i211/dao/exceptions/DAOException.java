@@ -1,8 +1,14 @@
-package fr.univtln.bruno.i211.dao;
+package fr.univtln.bruno.i211.dao.exceptions;
 
+import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.ToString;
+
+import java.sql.SQLException;
 
 @Data
-public class DAOException extends Exception {
-    private final Exception sourceException;
+@AllArgsConstructor
+@ToString
+public class DAOException extends BasicException {
+    private SQLException sqlException;
 }
