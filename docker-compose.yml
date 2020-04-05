@@ -1,0 +1,29 @@
+version: '3.5'
+
+# Run with : COMPOSE_DOCKER_CLI_BUILD=1 DOCKER_BUILDKIT=1 docker-compose build
+
+services:
+  db:
+    build: docker/postgresql-dvdrental
+    image: brunoe/postgresql-dvdrental
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-postgres}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-changeme}
+      PGDATA: /data/postgres
+    volumes:
+       - pg-data:/data/postgres
+    ports:
+       - 5432:5432
+    restart: unless-stopped
+
+  myapp:
+    build:
+      context: ./
+      dockerfile: docker/MyApp/Dockerfile
+    depends_on:
+      - db
+    links:
+      - db
+
+volumes:
+    pg-data:
