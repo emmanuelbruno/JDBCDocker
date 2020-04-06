@@ -1,6 +1,7 @@
 package fr.univtln.bruno.i211;
 
 import fr.univtln.bruno.i211.dao.entities.Actor;
+import fr.univtln.bruno.i211.dao.entities.Film;
 import lombok.extern.java.Log;
 
 import javax.persistence.EntityManager;
@@ -8,6 +9,7 @@ import javax.persistence.EntityManagerFactory;
 import javax.persistence.EntityTransaction;
 import javax.persistence.Persistence;
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * A simple JDBC App!
@@ -66,8 +68,17 @@ public class App {
 
             //We try to find and raise an error.
             newActor = em.find(Actor.class, newActorID);
-            log.info("The deleted newActor ???"+newActor.toString());
+            log.info("The deleted newActor ???" + newActor);
 
+            Film film1 = em.find(Film.class, 1L);
+            log.info("Film 1:" + film1);
+            //Warning actor list in load in lazy mode (ie not fetch untl access).
+            log.info("Film 1 actors:" + film1.getActors().stream().map(actor -> "("+actor.getLast_name()+", "+actor.getLast_name()+")").collect(Collectors.joining(", ")));
+
+
+            Actor actor1 = em.find(Actor.class, 1L);
+            log.info("Actor 1:" + actor1);
+            log.info("Actor 1 films:" + actor1.getFilms().stream().map(Film::getTitle).collect(Collectors.joining(", ")));
 
             em.close();
 

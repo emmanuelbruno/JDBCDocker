@@ -7,6 +7,7 @@ import lombok.NoArgsConstructor;
 
 import javax.persistence.*;
 import java.io.Serializable;
+import java.util.List;
 
 /**
  * The type Actor.
@@ -36,5 +37,8 @@ public class Actor implements Serializable {
 
     @Column(name = "last_name")
     private String last_name;
+
+    @ManyToMany(mappedBy = "actors")
+    private List<Film> films;
 }
 
