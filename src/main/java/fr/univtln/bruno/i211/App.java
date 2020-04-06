@@ -1,10 +1,13 @@
 package fr.univtln.bruno.i211;
 
-import fr.univtln.bruno.i211.dao.ActorDAO;
 import fr.univtln.bruno.i211.dao.entities.Actor;
-import fr.univtln.bruno.i211.dao.exceptions.DAOException;
-import fr.univtln.bruno.i211.dao.utils.DBCPDataSource;
 import lombok.extern.java.Log;
+
+import javax.persistence.EntityManager;
+import javax.persistence.EntityManagerFactory;
+import javax.persistence.EntityTransaction;
+import javax.persistence.Persistence;
+import java.util.List;
 
 /**
  * A simple JDBC App!
@@ -19,36 +22,52 @@ public class App {
     public static void main(String[] args) {
         try {
             Thread.sleep(5000);
-            //Create a DAO for actors
-            ActorDAO actorDAO = new ActorDAO();
-            log.info(DBCPDataSource.getStatus());
 
             //Create a new Actor and persist it
             Actor newActor = Actor.builder().first_name("John").last_name("DOE").build();
-            long newActorID = actorDAO.persist(newActor);
+            long newActorID = -1;
 
+            EntityManagerFactory emf = Persistence
+                    .createEntityManagerFactory("testpostgresqllocal");
+            EntityManager em = emf.createEntityManager();
 
-            //List all actors
-            //System.out.println(actorDAO.findAll());
+            EntityTransaction transac = em.getTransaction();
+
+            transac.begin();
+            em.persist(newActor);
+            em.flush();
+            newActorID = newActor.getId();
+            log.info("L'acteur ajouté :" + newActor);
+
+            transac.commit();
 
             //Find the news actor by ID
-            newActor = actorDAO.findById(newActorID);
-            log.info("The new actor: "+newActor.toString());
+            newActor = em.find(Actor.class, newActorID);
+            log.info("The new actor (by Id) : " + newActor.toString());
+
+            //List all actors (limit to 5)
+            List<Actor> actors = em.createNamedQuery("Actor.findAll")
+                    .setMaxResults(5)
+                    .getResultList();
+            log.info("5 actors: " + actors);
+
 
             //Update this actor
+            transac.begin();
             newActor.setLast_name("SMITH");
-            actorDAO.update(newActor);
-            log.info("The new actor updated: "+newActor.toString());
+            em.merge(newActor);
+            log.info("The new actor updated: " + em.find(Actor.class, newActorID).toString());
+            transac.commit();
 
             //and delete It.
-            actorDAO.remove(newActor);
+            transac.begin();
+            em.remove(newActor);
+            transac.commit();
 
             //We try to find and raise an error.
-            newActor = actorDAO.findById(newActorID);
+            newActor = em.find(Actor.class, newActorID);
             log.info("The deleted newActor ???"+newActor.toString());
 
-        } catch (DAOException e) {
-            log.severe("Erreur d'accès à la DAO. "+e.getSqlException());
         } catch (InterruptedException e) {
             log.severe("Erreur de pause.");
         }
