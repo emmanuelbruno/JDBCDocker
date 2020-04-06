@@ -68,6 +68,9 @@ public class App {
             newActor = em.find(Actor.class, newActorID);
             log.info("The deleted newActor ???"+newActor.toString());
 
+
+            em.close();
+
         } catch (InterruptedException e) {
             log.severe("Erreur de pause.");
         }
